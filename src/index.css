@@ -6,8 +6,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.comment {
+  line-height: 36px;
+}
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+.comment .comment-title{
+  display: inline-block;
+  width: 180px;
+  margin-right: 40px;
 }
