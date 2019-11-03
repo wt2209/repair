@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Statistic, Button } from 'antd';
+import { Row, Col, Statistic, Button, Card } from 'antd';
 
 class Statistics extends React.Component {
   render() {

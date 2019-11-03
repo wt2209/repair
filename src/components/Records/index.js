@@ -10,6 +10,7 @@ class Records extends React.Component {
       <>
         {records.length > 0 && records.map(record => (
           <Card
+            style={{ marginBottom: 20 }}
             key={record.serialNumber}
             actions={
               [

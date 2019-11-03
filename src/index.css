@@ -7,7 +7,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 .comment {
-  line-height: 36px;
+  line-height: 24px;
 }
 
 .comment .comment-title{
