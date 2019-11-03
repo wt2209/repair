@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Route, Link, Redirect } from 'react-router-dom';
 import 'antd/dist/antd.css';
 import { Layout, Menu } from 'antd';
 import Create from './views/create';
@@ -12,6 +12,7 @@ const routes = [
   { name: '报修', path: '/create', component: Create },
   { name: '查询', path: '/record', component: Record },
   { name: '统计', path: '/statistics', component: Statistics },
+  { path: '/', redirect: '/create' },
 ]
 
 class App extends React.Component {
@@ -39,10 +40,12 @@ class App extends React.Component {
             </Menu>
           </Header>
           <Content style={{ padding: '0 50px', marginTop: 24 }}>
-            <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
-              {routes.map((route, index) => (
-                <Route path={route.path} key={route.name} component={route.component} />
-              ))}
+            <div style={{ padding: 24, minHeight: 280 }}>
+              {routes.map((route, index) => {
+                return route.redirect
+                  ? <Redirect key={route.path} to={route.redirect} />
+                  : <Route path={route.path} key={route.name} component={route.component} />
+              })}
             </div>
           </Content>
           <Footer style={{ textAlign: 'center' }}></Footer>

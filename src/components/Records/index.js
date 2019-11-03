@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Icon, Descriptions, Radio } from 'antd';
+import RecordTitle from '../RecordTitle';
 
 class Records extends React.Component {
 
@@ -9,6 +10,7 @@ class Records extends React.Component {
       <>
         {records.length > 0 && records.map(record => (
           <Card
+            key={record.serialNumber}
             actions={
               [
                 <Icon type="setting" key="setting" />,
@@ -16,7 +18,7 @@ class Records extends React.Component {
                 <Icon type="ellipsis" key="ellipsis" />,
               ]}
           >
-            <Descriptions size="small" column={4} title={"编号：" + record.serialNumber} bordered>
+            <Descriptions size="small" column={4} title={<RecordTitle title={record.serialNumber} />} bordered>
               <Descriptions.Item label="报修单位">{record.company}</Descriptions.Item>
               <Descriptions.Item label="报修人">{record.name}</Descriptions.Item>
               <Descriptions.Item label="报修地点">{record.location}</Descriptions.Item>

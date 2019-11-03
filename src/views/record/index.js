@@ -14,7 +14,7 @@ class Record extends React.Component {
         serviceContent: 'asfdasd',
         material: 'asdfasdfsadfasdfasd',
         appointmentTime: '2019-11-1',
-        createTime: '2019-11-1',
+        createTime: '2019-11-01 12:30:09',
         completeTime: '2019-11-2',
         repairer: 'zasdf',
         timely: 'no', // yes no
