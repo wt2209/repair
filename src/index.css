@@ -1,17 +1,60 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 .comment {
   line-height: 24px;
 }
 
-.comment .comment-title{
+.comment .comment-title {
   display: inline-block;
   width: 180px;
   margin-right: 40px;
+}
+
+.print-area {
+  text-align: center;
+}
+
+.print-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.print-serial-number {
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.print-table {
+  margin: 0 auto;
+}
+
+.print-table td {
+  border: 1px solid black;
+  line-height: 1.4em;
+  padding: 3px;
+}
+
+.print-table td.print-label {
+  text-align: center;
+  min-width: 70px;
+}
+
+.print-table td.print-content {
+  text-align: left;
+  min-width: 100px;
+  font-weight: bold;
+  font-family: "黑体";
+}
+
+@media print {
+  body {
+    padding: 0.5cm;
+  }
 }

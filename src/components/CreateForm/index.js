@@ -1,6 +1,5 @@
 import React from 'react';
 import { Descriptions, Input, DatePicker, Button } from 'antd';
-import CreateFormTitle from '../CreateFormTitle';
 
 class CreateForm extends React.Component {
   render() {

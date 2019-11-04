@@ -1,50 +1,123 @@
 import React from 'react';
 import ReactToPrint from 'react-to-print';
+import { Button } from 'antd';
 
-class ComponentToPrint extends React.Component {
+class TemplateToPrint extends React.Component {
   render() {
+    const { record } = this.props;
     return (
-      <table>
-        <thead>
-          <th>column 1</th>
-          <th>column 2</th>
-          <th>column 3</th>
-        </thead>
-        <tbody>
-          <tr>
-            <td>data 1</td>
-            <td>data 2</td>
-            <td>data 3</td>
-          </tr>
-          <tr>
-            <td>data 1</td>
-            <td>data 2</td>
-            <td>data 3</td>
-          </tr>
-          <tr>
-            <td>data 1</td>
-            <td>data 2</td>
-            <td>data 3</td>
-          </tr>
-        </tbody>
-      </table>
-    );
-  }
-}
-
-class Example extends React.Component {
-  render() {
-    return (
-      <div>
-        <ReactToPrint
-          trigger={() => <button>Print this out!</button>}
-          content={() => this.componentRef}
-        />
-        <ComponentToPrint ref={el => (this.componentRef = el)} />
+      <div className="print-area">
+        <div className="print-title">
+          青岛诚晟物业（协力公寓）服务单
+        </div>
+        <table className="print-table">
+          <tbody>
+            <tr>
+              <td colSpan={8} style={{ border: 'none' }}>
+                <div className="print-serial-number">
+                  <span style={{ float: 'left' }}>编号：{record.serialNumber}</span>
+                  <span style={{ float: 'right' }}>受理时间：{record.createTime}</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td className="print-label">报修单位</td>
+              <td className="print-content">{record.company}</td>
+              <td className="print-label">报修人</td>
+              <td className="print-content">{record.name}</td>
+              <td className="print-label">报修地点</td>
+              <td className="print-content">{record.location}</td>
+              <td className="print-label">联系电话</td>
+              <td className="print-content">{record.phone}</td>
+            </tr>
+            <tr>
+              <td className="print-label">受理内容</td>
+              <td className="print-content" colSpan={3}>{record.content}</td>
+              <td className="print-label">预约时间</td>
+              <td className="print-content">{record.appointmentTime}</td>
+              <td className="print-label">完成时间</td>
+              <td className="print-content">{record.completeTime}</td>
+            </tr>
+            <tr>
+              <td className="print-label">服务内容</td>
+              <td className="print-content" colSpan={5}>{record.serviceContent}</td>
+              <td className="print-label">完工签字</td>
+              <td className="print-content">{record.repairer}</td>
+            </tr>
+            <tr>
+              <td className="print-label" style={{ height: '70px' }}>使用材料</td>
+              <td className="print-content" colSpan={7}>{record.matetial}</td>
+            </tr>
+            <tr>
+              <td colSpan={8} style={{ textAlign: 'left' }}>客户评价(打“ √ ”)：</td>
+            </tr>
+            <tr>
+              <td colSpan={8} style={{ textAlign: 'left' }}>
+                <span style={{ display: 'inline-block', width: 280 }}>
+                  1. 服务人员按时到达？
+                  是({record.timely === 'yes' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                  否({record.timely === 'no' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                </span>
+                <span style={{ display: 'inline-block' }}>
+                  3. 服务人员态度如何？
+                  好({record.attitude === 'good' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                  一般({record.attitude === 'general' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                  差({record.attitude === 'bad' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={8} style={{ textAlign: 'left' }}>
+                <span style={{ display: 'inline-block', width: 280 }}>
+                  2. 服务人员打扫现场？
+                  是({record.clean === 'yes' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                  否({record.clean === 'no' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                </span>
+                <span style={{ display: 'inline-block' }}>
+                  4. 您是否满意？
+                非常满意({record.satisfaction === 'very' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                满意({record.satisfaction === 'good' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                不满意({record.satisfaction === 'bad' ? ' √ ' : <>&nbsp;&nbsp;&nbsp;</>})
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     );
   }
 }
 
+class Print extends React.Component {
+  state = {
+    loading: false
+  }
+  handleClick = () => {
+    this.setState({
+      loading: true
+    })
+  }
+  handleAfterPrint = () => {
+    this.setState({
+      loading: false,
+    })
+  }
+  render() {
+    const { record } = this.props;
+    return (
+      <div>
+        <ReactToPrint
+          content={() => this.componentRef}
+          trigger={() =>
+            <div style={{ textAlign: 'right', marginBottom: 20 }}>
+              <Button loading={this.state.loading} onClick={this.handleClick} type="primary">打印</Button>
+            </div>}
+          onAfterPrint={this.handleAfterPrint}
+        />
+        <TemplateToPrint record={record} ref={el => (this.componentRef = el)} />
+      </div>
+    );
+  }
+}
 
-export default Example;
+export default Print;
