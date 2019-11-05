@@ -12,7 +12,7 @@ const routes = [
   { name: '报修', path: '/create', component: Create },
   { name: '查询', path: '/record', component: Record },
   { name: '统计', path: '/statistics', component: Statistics },
-  { path: '/', redirect: '/create' },
+  { path: '/', redirect: '/record' },
 ]
 
 class App extends React.Component {

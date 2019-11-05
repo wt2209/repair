@@ -6,7 +6,7 @@ class Records extends React.Component {
   render() {
     const { records, handleEdit, handlePrint, handleDelete } = this.props;
     return (
-      <>
+      <div>
         {records.length > 0 && records.map(record => (
           <Card
             style={{ marginBottom: 20 }}
@@ -81,7 +81,7 @@ class Records extends React.Component {
           </Card >
         ))
         }
-      </>
+      </div>
     )
   }
 }

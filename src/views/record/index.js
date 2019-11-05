@@ -1,10 +1,20 @@
 import React from 'react';
 import Records from '../../components/Records';
-import { Modal, Pagination, Card, BackTop } from 'antd';
+import { Modal, Pagination, Card, BackTop, Divider, Button, Spin } from 'antd';
 import Print from '../print';
+import TagSelect from '../../components/TagSelect';
+import SearchBar from '../../components/SearchBar';
 
 class Record extends React.Component {
   state = {
+    searchOptions: {
+      serialNumber: '',
+      location: '',
+      createRange: [], // [start, end]
+      attitude: [], // ['very', 'good', 'bad']
+      printed: [] // ['yes', 'no']
+    },
+    loading: false,
     printVisible: false,
     currentRecord: {},
     records: [
@@ -21,7 +31,7 @@ class Record extends React.Component {
         createTime: '2019-11-01 12:30:09',
         completeTime: '2019-11-2',
         repairer: 'zasdf',
-        timely: 'no', // yes no
+        timely: 'yes', // yes no
         attitude: 'good', // good general bad
         clean: 'yes',
         satisfaction: 'good', // very good bad
@@ -59,18 +69,67 @@ class Record extends React.Component {
     })
   }
   handlePrintCancel = () => {
+    this.setState({ printVisible: false })
+  }
+  handleAttitudeChange = (value) => {
+    const newSearchOptions = {
+      ...this.state.searchOptions,
+      attitude: value
+    }
+    this.fetchData(newSearchOptions)
+  }
+  handlePrintedChange = (value) => {
+    const newSearchOptions = {
+      ...this.state.searchOptions,
+      printed: value
+    }
+    this.fetchData(newSearchOptions)
+  }
+  handleSearch = value => {
+    const newSearchOptions = {
+      ...this.state.searchOptions,
+      ...value
+    }
+    this.fetchData(newSearchOptions)
+  }
+  fetchData = (searchOptions) => {
     this.setState({
-      printVisible: false
+      loading: true,
+      searchOptions: searchOptions
     })
+    console.log(searchOptions)
+    setTimeout(() => {
+      this.setState({ loading: false })
+    }, 1000);
   }
   render() {
+    const attitude = [
+      { label: '非常满意', value: 'very' },
+      { label: '满意', value: 'good' },
+      { label: '不满意', value: 'bad' },
+    ]
+    const printStatus = [
+      { label: '已打印', value: 'yes' },
+      { label: '未打印', value: 'no' },
+    ]
     return (
-      <div>
+      <div style={{ display: 'relative' }}>
         <BackTop
           visibilityHeight={100}
           target={() => document.getElementById('main-scroll-content')}
         />
-
+        <Card style={{ marginBottom: 20 }}>
+          <TagSelect options={attitude} title="态度" onChange={(value) => this.handleAttitudeChange(value)} />
+          <Divider dashed={true} style={{ margin: 12 }} />
+          <TagSelect options={printStatus} title="是否打印" onChange={value => this.handlePrintedChange(value)} />
+          <Divider dashed={true} style={{ margin: 12 }} />
+          <SearchBar onSearch={value => this.handleSearch(value)} />
+          <Divider dashed={true} style={{ margin: 12 }} />
+          <Button>导出以下内容</Button>
+        </Card>
+        <div style={{ position: 'fixed', zIndex: 10, top: 350, left: 0, textAlign: 'center', width: '100%', }}>
+          <Spin size="large" spinning={this.state.loading} />
+        </div>
         <Records
           records={this.state.records}
           handlePrint={this.handlePrint}
@@ -93,7 +152,7 @@ class Record extends React.Component {
         >
           <Print record={this.state.currentRecord} />
         </Modal>
-      </div>
+      </div >
     )
   }
 }
