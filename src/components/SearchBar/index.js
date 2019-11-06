@@ -30,7 +30,7 @@ class SearchBar extends React.Component {
             )}
           </Form.Item>
           <Form.Item style={{ width: 220 }}>
-            {getFieldDecorator('create-range')(
+            {getFieldDecorator('createRange')(
               <RangePicker />
             )}
           </Form.Item>

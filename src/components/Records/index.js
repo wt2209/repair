@@ -1,10 +1,24 @@
 import React from 'react';
-import { Card, Icon, Descriptions, Popconfirm, Rate } from 'antd';
+import { Card, Icon, Descriptions, Popconfirm, Rate, Modal } from 'antd';
 import RecordTitle from '../RecordTitle';
+import Print from '../../views/print';
 
 class Records extends React.Component {
+  state = {
+    currentRecord: {},
+    printVisible: false,
+  }
+  handlePrint = (currentRecord) => {
+    this.setState({
+      printVisible: true,
+      currentRecord,
+    })
+  }
+  handlePrintCancel = () => {
+    this.setState({ printVisible: false })
+  }
   render() {
-    const { records, handleEdit, handlePrint, handleDelete } = this.props;
+    const { records, handleDelete, handleEdit } = this.props;
     return (
       <div>
         {records.length > 0 && records.map(record => (
@@ -13,7 +27,7 @@ class Records extends React.Component {
             key={record.serialNumber}
             actions={
               [
-                <Icon type="printer" key="printer" onClick={() => handlePrint(record)} />,
+                <Icon type="printer" key="printer" onClick={() => this.handlePrint(record)} />,
                 <Icon type="edit" key="edit" onClick={() => handleEdit(record)} />,
                 <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(record)} okText="确定" cancelText="取消">
                   <Icon type="delete" key="delete" />
@@ -81,6 +95,15 @@ class Records extends React.Component {
           </Card >
         ))
         }
+        <Modal
+          title="打印预览"
+          width={800}
+          visible={this.state.printVisible}
+          onCancel={this.handlePrintCancel}
+          footer={null}
+        >
+          <Print record={this.state.currentRecord} />
+        </Modal>
       </div>
     )
   }

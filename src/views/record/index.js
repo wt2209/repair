@@ -1,159 +1,168 @@
-import React from 'react';
-import Records from '../../components/Records';
-import { Modal, Pagination, Card, BackTop, Divider, Button, Spin } from 'antd';
-import Print from '../print';
-import TagSelect from '../../components/TagSelect';
-import SearchBar from '../../components/SearchBar';
+import React from "react";
+import Records from "../../components/Records";
+import {
+  Pagination,
+  Card,
+  BackTop,
+  Divider,
+  Button,
+  Spin,
+  message
+} from "antd";
+import TagSelect from "../../components/TagSelect";
+import SearchBar from "../../components/SearchBar";
+import { fetchList, deleteOne } from "../../server";
 
 class Record extends React.Component {
   state = {
     searchOptions: {
-      serialNumber: '',
-      location: '',
+      serialNumber: "",
+      location: "",
       createRange: [], // [start, end]
       attitude: [], // ['very', 'good', 'bad']
       printed: [] // ['yes', 'no']
     },
     loading: false,
-    printVisible: false,
     currentRecord: {},
-    records: [
-      {
-        serialNumber: '20191101001222',
-        name: 'zhangsan',
-        company: 'asdfhjasdflh',
-        location: '1-1021',
-        phone: '13333333333',
-        content: 'asdfhjkasdifgjklsadf',
-        serviceContent: 'asfdasd',
-        material: 'asdfasdfsadfasdfasd',
-        appointmentTime: '2019-11-1',
-        createTime: '2019-11-01 12:30:09',
-        completeTime: '2019-11-2',
-        repairer: 'zasdf',
-        timely: 'yes', // yes no
-        attitude: 'good', // good general bad
-        clean: 'yes',
-        satisfaction: 'good', // very good bad
-      },
-      {
-        serialNumber: '20191101001233',
-        name: 'zhangsan',
-        company: 'asdfhjasdflh',
-        location: '1-1021',
-        phone: '13333333333',
-        content: 'asdfhjkasdifgjklsadf',
-        serviceContent: 'asfdasd',
-        material: 'asdfasdfsadfasdfasd',
-        appointmentTime: '2019-11-1',
-        createTime: '2019-11-01 12:30:09',
-        completeTime: '2019-11-2',
-        repairer: 'zasdf',
-        timely: 'no', // yes no
-        attitude: 'bad', // good general bad
-        clean: 'yes',
-        satisfaction: 'good', // very good bad
-      }
-    ],
-  }
-  handleEdit = (record) => {
-    console.log('edit', record)
-  }
-  handleDelete = (record) => {
-    console.log('delete', record)
-  }
-  handlePrint = (currentRecord) => {
-    this.setState({
-      printVisible: true,
-      currentRecord,
-    })
-  }
-  handlePrintCancel = () => {
-    this.setState({ printVisible: false })
-  }
-  handleAttitudeChange = (value) => {
-    const newSearchOptions = {
+    records: [],
+    pagination: {
+      current: undefined,
+      pageSize: undefined, // 每页条数
+      total: undefined //总条数
+    }
+  };
+  componentDidMount = () => {
+    this.fetchData();
+  };
+  handleAttitudeChange = value => {
+    const searchOptions = {
       ...this.state.searchOptions,
       attitude: value
-    }
-    this.fetchData(newSearchOptions)
-  }
-  handlePrintedChange = (value) => {
-    const newSearchOptions = {
+    };
+    this.setState({ searchOptions });
+    this.fetchData(searchOptions);
+  };
+  handlePrintedChange = value => {
+    const searchOptions = {
       ...this.state.searchOptions,
       printed: value
+    };
+    this.setState({ searchOptions });
+    this.fetchData(searchOptions);
+  };
+  handleSearch = values => {
+    if (values.createRange) {
+      values.createRange = values.createRange.map(item =>
+        typeof item !== "string" ? item.format("YYYY-MM-DD") : item
+      );
     }
-    this.fetchData(newSearchOptions)
-  }
-  handleSearch = value => {
-    const newSearchOptions = {
+    const searchOptions = {
       ...this.state.searchOptions,
-      ...value
-    }
-    this.fetchData(newSearchOptions)
-  }
-  fetchData = (searchOptions) => {
+      ...values
+    };
+    this.setState({ searchOptions });
+    this.fetchData(searchOptions);
+  };
+  handlePageChange = (current, pageSize) => {
+    const { searchOptions, pagination } = this.state;
+    const newPagination = {
+      ...pagination,
+      current,
+      pageSize
+    };
+    this.setState({ pagination: newPagination });
+    this.fetchData(searchOptions, newPagination);
+  };
+  fetchData = async (searchOptions = {}, pagination) => {
+    this.setState({ loading: true });
+    const data = await fetchList(
+      searchOptions,
+      pagination || this.state.pagination
+    );
     this.setState({
-      loading: true,
-      searchOptions: searchOptions
-    })
-    console.log(searchOptions)
-    setTimeout(() => {
-      this.setState({ loading: false })
-    }, 1000);
-  }
+      loading: false,
+      records: data.list,
+      pagination: data.pagination
+    });
+  };
+  handleEdit = record => {
+    console.log("edit", record);
+  };
+  handleDelete = async record => {
+    this.setState({ loading: true });
+    await deleteOne(record);
+    const { records } = this.state;
+    records.splice(records.indexOf(record), 1);
+    this.setState({ records, loading: false });
+    message.success("删除成功", 2.5);
+  };
   render() {
     const attitude = [
-      { label: '非常满意', value: 'very' },
-      { label: '满意', value: 'good' },
-      { label: '不满意', value: 'bad' },
-    ]
+      { label: "非常满意", value: "very" },
+      { label: "满意", value: "good" },
+      { label: "不满意", value: "bad" }
+    ];
     const printStatus = [
-      { label: '已打印', value: 'yes' },
-      { label: '未打印', value: 'no' },
-    ]
+      { label: "已打印", value: "yes" },
+      { label: "未打印", value: "no" }
+    ];
+    const { pagination } = this.state;
     return (
-      <div style={{ display: 'relative' }}>
+      <div style={{ display: "relative" }}>
         <BackTop
           visibilityHeight={100}
-          target={() => document.getElementById('main-scroll-content')}
+          target={() => document.getElementById("main-scroll-content")}
         />
         <Card style={{ marginBottom: 20 }}>
-          <TagSelect options={attitude} title="态度" onChange={(value) => this.handleAttitudeChange(value)} />
+          <TagSelect
+            options={attitude}
+            title="态度"
+            onChange={value => this.handleAttitudeChange(value)}
+          />
           <Divider dashed={true} style={{ margin: 12 }} />
-          <TagSelect options={printStatus} title="是否打印" onChange={value => this.handlePrintedChange(value)} />
+          <TagSelect
+            options={printStatus}
+            title="是否打印"
+            onChange={value => this.handlePrintedChange(value)}
+          />
           <Divider dashed={true} style={{ margin: 12 }} />
-          <SearchBar onSearch={value => this.handleSearch(value)} />
+          <SearchBar onSearch={values => this.handleSearch(values)} />
           <Divider dashed={true} style={{ margin: 12 }} />
           <Button>导出以下内容</Button>
         </Card>
-        <div style={{ position: 'fixed', zIndex: 10, top: 350, left: 0, textAlign: 'center', width: '100%', }}>
+        <div
+          style={{
+            position: "fixed",
+            zIndex: 10,
+            top: 350,
+            left: 0,
+            textAlign: "center",
+            width: "100%"
+          }}
+        >
           <Spin size="large" spinning={this.state.loading} />
         </div>
         <Records
           records={this.state.records}
-          handlePrint={this.handlePrint}
           handleDelete={this.handleDelete}
           handleEdit={this.handleEdit}
         />
-        <Card
-          style={{ textAlign: 'center' }}
-          bodyStyle={{ padding: 12 }}
-        >
-          <Pagination showTotal={total => `共 ${total} 项`} defaultCurrent={6} total={500} />
-        </Card>
+        {pagination.current > 0 && (
+          <Card style={{ textAlign: "center" }} bodyStyle={{ padding: 12 }}>
+            <Pagination
+              showTotal={total => `共 ${total} 项`}
+              current={pagination.current}
+              pageSize={pagination.pageSize}
+              total={pagination.total}
+              onChange={(current, pageSize) =>
+                this.handlePageChange(current, pageSize)
+              }
+            />
+          </Card>
+        )}
         <div style={{ height: 100 }}></div>
-        <Modal
-          title="打印预览"
-          width={800}
-          visible={this.state.printVisible}
-          onCancel={this.handlePrintCancel}
-          footer={null}
-        >
-          <Print record={this.state.currentRecord} />
-        </Modal>
-      </div >
-    )
+      </div>
+    );
   }
 }
 
