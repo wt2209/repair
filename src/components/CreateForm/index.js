@@ -1,10 +1,10 @@
-import React from 'react';
-import { Descriptions, Input, DatePicker, Button } from 'antd';
+import React from "react";
+import { Descriptions, Input, DatePicker, Button, Card } from "antd";
 
 class CreateForm extends React.Component {
   render() {
     return (
-      <>
+      <Card>
         <Descriptions size="small" column={3} title="报修" bordered>
           <Descriptions.Item label="报修单位">
             <Input />
@@ -27,17 +27,19 @@ class CreateForm extends React.Component {
           <Descriptions.Item label="受理内容" span={2}>
             <Input />
           </Descriptions.Item>
-          <Descriptions.Item>
-          </Descriptions.Item>
-        </Descriptions >
-        <div style={{ marginTop: 40, textAlign: 'center' }}>
-          <Button size="large" style={{ width: 200, marginRight: 50 }} >提交</Button>
-          <Button size="large" type="primary" style={{ width: 200 }} >提交并打印</Button>
+          <Descriptions.Item></Descriptions.Item>
+        </Descriptions>
+        <div style={{ marginTop: 40, textAlign: "center" }}>
+          <Button size="large" style={{ width: 200, marginRight: 50 }}>
+            提交
+          </Button>
+          <Button size="large" type="primary" style={{ width: 200 }}>
+            提交并打印
+          </Button>
         </div>
-      </>
-    )
+      </Card>
+    );
   }
 }
-
 
 export default CreateForm;

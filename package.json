@@ -1,8 +1,14 @@
 {
   "name": "repair",
   "version": "0.1.0",
+  "author": {
+    "name": "wt2209",
+    "email": "wt2209@126.com"
+  },
+  "description": "报修系统",
   "private": true,
   "main": "main.js",
+  "homepage": ".",
   "dependencies": {
     "antd": "^3.24.3",
     "react": "^16.11.0",
@@ -12,13 +18,52 @@
     "react-to-print": "^2.5.0",
     "sqlite3": "^4.1.0"
   },
+  "devDependencies": {
+    "electron": "^7.0.1",
+    "electron-builder": "^22.1.0"
+  },
   "scripts": {
+    "postinstall": "electron-builder install-app-deps",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "rebuild": "electron-rebuild -f -w sqlite3"
+    "package": "electron-builder build"
+  },
+  "build": {
+    "productName": "报修系统",
+    "appId": "com.wt2209.repair",
+    "copyright": "wt2209@126.com",
+    "directories": {
+      "output": "dist"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "build/**/*",
+      "main.js",
+      "preload.js",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "extraMetadata": "main.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -34,9 +79,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "electron": "^7.0.1",
-    "electron-rebuild": "^1.8.6"
   }
 }

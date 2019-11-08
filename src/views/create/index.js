@@ -1,14 +1,9 @@
-import React from 'react';
-import CreateForm from '../../components/CreateForm';
-import { Card } from 'antd';
+import React from "react";
+import CreateForm from "../../components/CreateForm";
 
 class Create extends React.Component {
   render() {
-    return (
-      <Card >
-        <CreateForm />
-      </Card>
-    )
+    return <CreateForm />;
   }
 }
 

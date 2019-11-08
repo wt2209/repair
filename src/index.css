@@ -33,6 +33,7 @@ body {
 
 .print-table {
   margin: 0 auto;
+  border-collapse: collapse;
 }
 
 .print-table td {
