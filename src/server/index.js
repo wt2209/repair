@@ -101,3 +101,12 @@ export function deleteOne(record) {
     }, 1000);
   });
 }
+
+export function store(record) {
+  console.log("store", record);
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(record);
+    }, 1000);
+  });
+}
