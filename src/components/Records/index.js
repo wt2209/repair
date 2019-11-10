@@ -2,11 +2,13 @@ import React from "react";
 import { Card, Icon, Descriptions, Popconfirm, Rate, Modal } from "antd";
 import RecordTitle from "../RecordTitle";
 import Print from "../../views/print";
+import EditForm from "../EditForm";
 
 class Records extends React.Component {
   state = {
     currentRecord: {},
-    printVisible: false
+    printVisible: false,
+    editVisible: false
   };
   handlePrint = currentRecord => {
     this.setState({
@@ -14,11 +16,14 @@ class Records extends React.Component {
       currentRecord
     });
   };
+  handleEdit = record => {
+    this.setState({ editVisible: true, currentRecord: record });
+  };
   handlePrintCancel = () => {
     this.setState({ printVisible: false });
   };
   render() {
-    const { records, handleDelete, handleEdit } = this.props;
+    const { records, handleDelete, handleUpdate } = this.props;
     return (
       <div>
         {records.length > 0 &&
@@ -35,7 +40,7 @@ class Records extends React.Component {
                 <Icon
                   type="edit"
                   key="edit"
-                  onClick={() => handleEdit(record)}
+                  onClick={() => this.handleEdit(record)}
                 />,
                 <Popconfirm
                   title="确定删除吗？"
@@ -225,6 +230,7 @@ class Records extends React.Component {
             </Card>
           ))}
         <Modal
+          key="print"
           title="打印预览"
           width={800}
           visible={this.state.printVisible}
@@ -232,6 +238,15 @@ class Records extends React.Component {
           footer={null}
         >
           <Print record={this.state.currentRecord} />
+        </Modal>
+        <Modal
+          key="edit"
+          width={980}
+          visible={this.state.editVisible}
+          onCancel={() => this.setState({ editVisible: false })}
+          onOk={this.handleUpdate}
+        >
+          <EditForm record={this.state.currentRecord} />
         </Modal>
       </div>
     );

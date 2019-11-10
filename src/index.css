@@ -5,6 +5,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.tight .ant-descriptions-item-label {
+  padding: 8px 6px !important;
+}
+
+.tight .ant-descriptions-item-content {
+  padding: 8px 2px !important;
+}
+
 .comment {
   line-height: 24px;
 }

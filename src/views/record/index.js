@@ -88,8 +88,8 @@ class Record extends React.Component {
         });
       });
   };
-  handleEdit = record => {
-    console.log("edit", record);
+  handleUpdate = record => {
+    console.log("update", record);
   };
   handleDelete = async record => {
     this.setState({ loading: true });

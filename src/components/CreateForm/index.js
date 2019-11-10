@@ -39,13 +39,6 @@ class CreateForm extends React.Component {
       ipcRenderer.invoke("store", formatRecordDate(fields)).then(record => {
         this.setState({ loading: false });
       });
-
-      // store(fields).then(record => {
-      //   if (printNow) {
-      //     this.handlePrint(formatRecordDate(record));
-      //   }
-      //   this.setState({ loading: false });
-      // });
     });
   };
   render() {
@@ -65,7 +58,13 @@ class CreateForm extends React.Component {
           <Spin size="large" spinning={this.state.loading} />
         </div>
         <Card>
-          <Descriptions size="small" column={3} title="报修" bordered>
+          <Descriptions
+            className="tight"
+            size="small"
+            column={4}
+            title="报修"
+            bordered
+          >
             <Descriptions.Item label="报修单位">
               <Form.Item style={{ margin: 0 }}>
                 {getFieldDecorator("company", {
@@ -80,6 +79,18 @@ class CreateForm extends React.Component {
                 })(<Input />)}
               </Form.Item>
             </Descriptions.Item>
+            <Descriptions.Item label="报修地点">
+              <Form.Item style={{ margin: 0 }}>
+                {getFieldDecorator("location", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "必须填写"
+                    }
+                  ]
+                })(<Input />)}
+              </Form.Item>
+            </Descriptions.Item>
             <Descriptions.Item label="联系电话">
               <Form.Item style={{ margin: 0 }}>
                 {getFieldDecorator("phone", {
@@ -87,9 +98,9 @@ class CreateForm extends React.Component {
                 })(<Input />)}
               </Form.Item>
             </Descriptions.Item>
-            <Descriptions.Item label="报修地点">
+            <Descriptions.Item label="受理内容" span={2}>
               <Form.Item style={{ margin: 0 }}>
-                {getFieldDecorator("location", {
+                {getFieldDecorator("content", {
                   rules: [
                     {
                       required: true,
@@ -129,19 +140,6 @@ class CreateForm extends React.Component {
                 )}
               </Form.Item>
             </Descriptions.Item>
-            <Descriptions.Item label="受理内容" span={2}>
-              <Form.Item style={{ margin: 0 }}>
-                {getFieldDecorator("content", {
-                  rules: [
-                    {
-                      required: true,
-                      message: "必须填写"
-                    }
-                  ]
-                })(<Input />)}
-              </Form.Item>
-            </Descriptions.Item>
-            <Descriptions.Item></Descriptions.Item>
           </Descriptions>
           <div style={{ marginTop: 40, textAlign: "center" }}>
             <Button
