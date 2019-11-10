@@ -121,6 +121,7 @@ function fetchList(options, pagination) {
   return knex
     .select("*")
     .from(tableName)
+    .orderBy("id", "desc")
     .then(function(rows) {
       return {
         status: "ok",

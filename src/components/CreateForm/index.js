@@ -7,10 +7,12 @@ import {
   Card,
   Form,
   Modal,
-  Spin
+  Spin,
+  message
 } from "antd";
 import Print from "../../views/print";
 import { formatRecordDate } from "../../utils";
+import moment from "moment";
 
 class CreateForm extends React.Component {
   state = {
@@ -37,7 +39,17 @@ class CreateForm extends React.Component {
 
       const { ipcRenderer } = window.electron;
       ipcRenderer.invoke("store", formatRecordDate(fields)).then(record => {
-        this.setState({ loading: false });
+        message.success("报修成功", 2);
+        this.props.form.resetFields();
+        if (printNow) {
+          this.setState({
+            loading: false,
+            currentRecord: record,
+            printVisible: true
+          });
+        } else {
+          this.setState({ loading: false });
+        }
       });
     });
   };
@@ -124,6 +136,7 @@ class CreateForm extends React.Component {
             <Descriptions.Item label="受理时间">
               <Form.Item style={{ margin: 0 }}>
                 {getFieldDecorator("createTime", {
+                  initialValue: moment(),
                   rules: [
                     {
                       type: "object",
