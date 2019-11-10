@@ -11,7 +11,8 @@ import {
 } from "antd";
 import TagSelect from "../../components/TagSelect";
 import SearchBar from "../../components/SearchBar";
-import { fetchList, deleteOne } from "../../server";
+
+const { ipcRenderer } = window.electron;
 
 class Record extends React.Component {
   state = {
@@ -53,7 +54,9 @@ class Record extends React.Component {
   handleSearch = values => {
     if (values.createRange) {
       values.createRange = values.createRange.map(item =>
-        typeof item !== "string" ? item.format("YYYY-MM-DD") : item
+        typeof item !== "string" && item.format
+          ? item.format("YYYY-MM-DD")
+          : item
       );
     }
     const searchOptions = {
@@ -73,28 +76,30 @@ class Record extends React.Component {
     this.setState({ pagination: newPagination });
     this.fetchData(searchOptions, newPagination);
   };
-  fetchData = async (searchOptions = {}, pagination) => {
+  fetchData = (searchOptions = {}, pagination) => {
     this.setState({ loading: true });
-    const data = await fetchList(
-      searchOptions,
-      pagination || this.state.pagination
-    );
-    this.setState({
-      loading: false,
-      records: data.list,
-      pagination: data.pagination
-    });
+    ipcRenderer
+      .invoke("fetchList", searchOptions, pagination || this.state.pagination)
+      .then(data => {
+        this.setState({
+          loading: false,
+          records: data.list,
+          pagination: data.pagination
+        });
+      });
   };
   handleEdit = record => {
     console.log("edit", record);
   };
   handleDelete = async record => {
     this.setState({ loading: true });
-    await deleteOne(record);
-    const { records } = this.state;
-    records.splice(records.indexOf(record), 1);
-    this.setState({ records, loading: false });
-    message.success("删除成功", 2.5);
+    ipcRenderer.invoke("delete", record).then(record => {
+      const { records } = this.state;
+      const newRecords = records.filter(item => item.id !== record.id);
+      records.splice(records.indexOf(record), 1);
+      this.setState({ records: newRecords, loading: false });
+      message.success("删除成功", 2.5);
+    });
   };
   render() {
     const attitude = [

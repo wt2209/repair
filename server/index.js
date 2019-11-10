@@ -37,6 +37,46 @@ const fakerList = [
   }
 ];
 
+function generateSerial() {
+  return "123";
+}
+
+const tableName = "records";
+var knex = require("knex")({
+  client: "sqlite3",
+  connection: {
+    filename: "./db.sqlite"
+  },
+  useNullAsDefault: true
+});
+knex.schema.hasTable(tableName).then(function(exists) {
+  if (!exists) {
+    knex.schema
+      .createTable(tableName, function(table) {
+        table.increments("id");
+        table.string("serialNumber");
+        table.string("name");
+        table.string("location");
+        table.string("content");
+        table.string("company");
+        table.string("serviceContent");
+        table.string("material");
+        table.string("repairer");
+        table.string("timely");
+        table.string("attitude");
+        table.string("clean");
+        table.string("satisfaction");
+        table.dateTime("createTime");
+        table.dateTime("appointmentTime");
+        table.dateTime("completeTime");
+        table.timestamps();
+      })
+      .then(s => {
+        console.log(s);
+      });
+  }
+});
+
 /**
  *
  * @api {get} /records get list
@@ -76,37 +116,56 @@ const fakerList = [
  *
  *
  */
-export function fetchList(options, pagination) {
+function fetchList(options, pagination) {
   console.log(options, pagination);
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve({
+  return knex
+    .select("*")
+    .from(tableName)
+    .then(function(rows) {
+      return {
         status: "ok",
-        list: fakerList,
+        list: rows,
         pagination: {
           current: 1,
           total: 101,
           pageSize: 10
         }
-      });
-    }, 1000);
-  });
+      };
+    });
 }
 
-export function deleteOne(record) {
-  console.log(record);
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(record);
-    }, 1000);
-  });
+function deleteOne(record) {
+  return knex(tableName)
+    .where("id", record.id)
+    .del();
 }
 
-export function store(record) {
-  console.log("store", record);
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(record);
-    }, 1000);
-  });
+function store(record) {
+  record.serialNumber = generateSerial();
+  var newRecord = record;
+
+  // 返回的是一个promise
+  return knex(tableName)
+    .insert(record)
+    .then(id => {
+      newRecord.id = id[0];
+      return newRecord;
+    });
 }
+
+const { ipcMain } = require("electron");
+
+ipcMain.handle("store", async (event, record) => {
+  const newRecord = await store(record);
+  return newRecord;
+});
+
+ipcMain.handle("fetchList", async (event, options, pagination) => {
+  const result = await fetchList(options, pagination);
+  return result;
+});
+
+ipcMain.handle("delete", async (event, record) => {
+  await deleteOne(record);
+  return record;
+});

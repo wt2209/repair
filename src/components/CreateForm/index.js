@@ -9,7 +9,6 @@ import {
   Modal,
   Spin
 } from "antd";
-import { store } from "../../server";
 import Print from "../../views/print";
 import { formatRecordDate } from "../../utils";
 
@@ -35,12 +34,18 @@ class CreateForm extends React.Component {
         return;
       }
       this.setState({ loading: true });
-      store(fields).then(record => {
-        if (printNow) {
-          this.handlePrint(formatRecordDate(record));
-        }
+
+      const { ipcRenderer } = window.electron;
+      ipcRenderer.invoke("store", formatRecordDate(fields)).then(record => {
         this.setState({ loading: false });
       });
+
+      // store(fields).then(record => {
+      //   if (printNow) {
+      //     this.handlePrint(formatRecordDate(record));
+      //   }
+      //   this.setState({ loading: false });
+      // });
     });
   };
   render() {

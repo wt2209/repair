@@ -25,7 +25,7 @@ class Records extends React.Component {
           records.map(record => (
             <Card
               style={{ marginBottom: 20 }}
-              key={record.serialNumber}
+              key={record.id}
               actions={[
                 <Icon
                   type="printer"
