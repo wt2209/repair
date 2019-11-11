@@ -22,8 +22,14 @@ class Records extends React.Component {
   handlePrintCancel = () => {
     this.setState({ printVisible: false });
   };
+  handleAfterPrint = record => {
+    // 交给上级处理
+    if (this.props.handleAfterPrint) {
+      this.props.handleAfterPrint(record);
+    }
+  };
   render() {
-    const { records, handleDelete, handleUpdate } = this.props;
+    const { records, handleDelete } = this.props;
     return (
       <div>
         {records.length > 0 &&
@@ -237,7 +243,10 @@ class Records extends React.Component {
           onCancel={this.handlePrintCancel}
           footer={null}
         >
-          <Print record={this.state.currentRecord} />
+          <Print
+            record={this.state.currentRecord}
+            handleAfterPrint={this.handleAfterPrint}
+          />
         </Modal>
         <Modal
           key="edit"

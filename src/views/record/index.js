@@ -20,33 +20,27 @@ class Record extends React.Component {
       serialNumber: "",
       location: "",
       createRange: [], // [start, end]
-      attitude: [], // ['very', 'good', 'bad']
-      printed: [] // ['yes', 'no']
+      ins: {}
     },
-    loading: false,
-    currentRecord: {},
-    records: [],
     pagination: {
       current: undefined,
       pageSize: undefined, // 每页条数
       total: undefined //总条数
-    }
+    },
+    loading: false,
+    currentRecord: {},
+    records: []
   };
   componentDidMount = () => {
     this.fetchData();
   };
-  handleAttitudeChange = value => {
+  handleTagSelectChange = (key, value) => {
     const searchOptions = {
       ...this.state.searchOptions,
-      attitude: value
-    };
-    this.setState({ searchOptions });
-    this.fetchData(searchOptions);
-  };
-  handlePrintedChange = value => {
-    const searchOptions = {
-      ...this.state.searchOptions,
-      printed: value
+      ins: {
+        ...this.state.searchOptions.ins,
+        [key]: value
+      }
     };
     this.setState({ searchOptions });
     this.fetchData(searchOptions);
@@ -76,7 +70,7 @@ class Record extends React.Component {
     this.setState({ pagination: newPagination });
     this.fetchData(searchOptions, newPagination);
   };
-  fetchData = (searchOptions = {}, pagination) => {
+  fetchData = (searchOptions = {}, pagination = undefined) => {
     this.setState({ loading: true });
     ipcRenderer
       .invoke("fetchList", searchOptions, pagination || this.state.pagination)
@@ -101,16 +95,44 @@ class Record extends React.Component {
       message.success("删除成功", 2.5);
     });
   };
+  handleAfterPrint = record => {
+    ipcRenderer.invoke("print", record).then(record => {});
+  };
   render() {
-    const attitude = [
-      { label: "非常满意", value: "very" },
-      { label: "满意", value: "good" },
-      { label: "不满意", value: "bad" }
-    ];
-    const printStatus = [
-      { label: "已打印", value: "yes" },
-      { label: "未打印", value: "no" }
-    ];
+    const ins = {
+      // timely: {
+      //   title: "按时到达",
+      //   labels: [{ label: "是", value: "yes" }, { label: "否", value: "no" }]
+      // },
+      // clean: {
+      //   title: "打扫现场",
+      //   labels: [{ label: "是", value: "yes" }, { label: "否", value: "no" }]
+      // },
+      // attitude: {
+      //   title: "态度如何",
+      //   labels: [
+      //     { label: "好", value: "good" },
+      //     { label: "一般", value: "general" },
+      //     { label: "差", value: "bad" }
+      //   ]
+      // },
+      satisfaction: {
+        title: "满意度",
+        labels: [
+          { label: "非常满意", value: "very" },
+          { label: "满意", value: "good" },
+          { label: "不满意", value: "bad" }
+        ]
+      },
+      printed: {
+        title: "是否打印",
+        labels: [
+          { label: "已打印", value: "yes" },
+          { label: "未打印", value: "no" }
+        ]
+      }
+    };
+
     const { pagination } = this.state;
     return (
       <div style={{ display: "relative" }}>
@@ -119,18 +141,21 @@ class Record extends React.Component {
           target={() => document.getElementById("main-scroll-content")}
         />
         <Card style={{ marginBottom: 20 }}>
-          <TagSelect
-            options={attitude}
-            title="态度"
-            onChange={value => this.handleAttitudeChange(value)}
-          />
-          <Divider dashed={true} style={{ margin: 12 }} />
-          <TagSelect
-            options={printStatus}
-            title="是否打印"
-            onChange={value => this.handlePrintedChange(value)}
-          />
-          <Divider dashed={true} style={{ margin: 12 }} />
+          {Object.keys(ins).map(key => {
+            const item = ins[key];
+            return (
+              <TagSelect
+                divider={true}
+                key={key}
+                currentKey={key}
+                title={item.title}
+                options={item.labels}
+                onChange={(key, value) =>
+                  this.handleTagSelectChange(key, value)
+                }
+              />
+            );
+          })}
           <SearchBar onSearch={values => this.handleSearch(values)} />
           <Divider dashed={true} style={{ margin: 12 }} />
           <Button>导出以下内容</Button>
@@ -151,6 +176,7 @@ class Record extends React.Component {
           records={this.state.records}
           handleDelete={this.handleDelete}
           handleEdit={this.handleEdit}
+          handleAfterPrint={this.handleAfterPrint}
         />
         {pagination.current > 0 && (
           <Card style={{ textAlign: "center" }} bodyStyle={{ padding: 12 }}>

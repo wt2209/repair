@@ -177,10 +177,14 @@ class Print extends React.Component {
       loading: true
     });
   };
-  handleAfterPrint = () => {
+  handleAfterPrint = record => {
     this.setState({
       loading: false
     });
+    // 交给上级处理
+    if (this.props.handleAfterPrint) {
+      this.props.handleAfterPrint(record);
+    }
   };
   render() {
     const { record } = this.props;
@@ -201,7 +205,7 @@ class Print extends React.Component {
               </Button>
             </div>
           )}
-          onAfterPrint={this.handleAfterPrint}
+          onAfterPrint={() => this.handleAfterPrint(record)}
         />
         <TemplateToPrint record={record} ref={el => (this.componentRef = el)} />
       </div>

@@ -75,18 +75,18 @@ class EditForm extends React.Component {
               </Radio.Group>
             </div>
             <div className="comment">
+              <span className="comment-title">3. 服务人员是否打扫现场？</span>
+              <Radio.Group>
+                <Radio value="yes">是</Radio>
+                <Radio value="no">否</Radio>
+              </Radio.Group>
+            </div>
+            <div className="comment">
               <span className="comment-title">2. 服务人员态度如何？</span>
               <Radio.Group>
                 <Radio value="good">好</Radio>
                 <Radio value="general">一般</Radio>
                 <Radio value="bad">差</Radio>
-              </Radio.Group>
-            </div>
-            <div className="comment">
-              <span className="comment-title">3. 服务人员是否打扫现场？</span>
-              <Radio.Group>
-                <Radio value="yes">是</Radio>
-                <Radio value="no">否</Radio>
               </Radio.Group>
             </div>
             <div className="comment">

@@ -1,44 +1,8 @@
-const fakerList = [
-  {
-    serialNumber: "20191101001222",
-    name: "zhangsan",
-    company: "asdfhjasdflh",
-    location: "1-1021",
-    phone: "13333333333",
-    content: "asdfhjkasdifgjklsadf",
-    serviceContent: "asfdasd",
-    material: "asdfasdfsadfasdfasd",
-    appointmentTime: "2019-11-1",
-    createTime: "2019-11-01 12:30:09",
-    completeTime: "2019-11-2",
-    repairer: "zasdf",
-    timely: "yes", // yes no
-    attitude: "good", // good general bad
-    clean: "yes",
-    satisfaction: "good" // very good bad
-  },
-  {
-    serialNumber: "20191101001233",
-    name: "zhangsan",
-    company: "asdfhjasdflh",
-    location: "1-1021",
-    phone: "13333333333",
-    content: "asdfhjkasdifgjklsadf",
-    serviceContent: "asfdasd",
-    material: "asdfasdfsadfasdfasd",
-    appointmentTime: "2019-11-1",
-    createTime: "2019-11-01 12:30:09",
-    completeTime: "2019-11-2",
-    repairer: "zasdf",
-    timely: "no", // yes no
-    attitude: "bad", // good general bad
-    clean: "yes",
-    satisfaction: "good" // very good bad
-  }
-];
-
 function generateSerial() {
-  return "123";
+  const date = new Date();
+  const dateStr =
+    "" + date.getFullYear() + (date.getMonth() + 1) + date.getDate();
+  return dateStr + "111";
 }
 
 const tableName = "records";
@@ -59,6 +23,7 @@ knex.schema.hasTable(tableName).then(function(exists) {
         table.string("location");
         table.string("content");
         table.string("company");
+        table.string("phone");
         table.string("serviceContent");
         table.string("material");
         table.string("repairer");
@@ -69,6 +34,7 @@ knex.schema.hasTable(tableName).then(function(exists) {
         table.dateTime("createTime");
         table.dateTime("appointmentTime");
         table.dateTime("completeTime");
+        table.string("printed").defaultTo("no");
         table.timestamps();
       })
       .then(s => {
@@ -77,31 +43,38 @@ knex.schema.hasTable(tableName).then(function(exists) {
   }
 });
 
+function createBuilder(options) {
+  const builder = knex.from(tableName);
+  if (options.location) {
+    builder.where("location", "like", `%${options.location}%`);
+  }
+  if (options.serialNumber) {
+    builder.where("serialNumber", options.serialNumber);
+  }
+  if (options.createRange && options.createRange.length > 0) {
+    builder.whereBetween("createTime", options.createRange);
+  }
+  Object.keys(options.ins || {}).map(key => {
+    const item = options.ins[key];
+    if (item && item.length > 0) {
+      builder.whereIn(key, item);
+    }
+    return key;
+  });
+  return builder;
+}
+
 /**
- *
- * @api {get} /records get list
- * @apiName getList
- * @apiGroup records
- * @apiVersion  major.minor.patch
- *
- *
- * @apiParam  {String} location 报修地点
- * @apiParam  {String} serialNumber 报修地点
- * @apiParam  {Array} createRange 受理时间，格式：[开始日， 结束日]
- * @apiParam  {Array} attitude 态度，格式 ['very', 'good', 'bad']
- * @apiParam  {Array} printed 是否已打印，格式 ['yes', 'no']
- *
- * @apiSuccess (200) {json} result 返回值
- *
  * @apiParamExample  {json} Request-Example:
  * {
  *     location : 1-1202,
  *     serialNumber: 20191103001,
  *     createRange: ['2019-11-1', '2019-11-30'],
- *     attitude: ['very', 'bad'],
- *     printed: ['yes', 'no']
+ *     ins:{
+ *         attitude: ['very', 'bad'],
+ *         printed: ['yes', 'no']
+ *     }
  * }
- *
  *
  * @apiSuccessExample {json} Success-Response:
  * {
@@ -113,52 +86,67 @@ knex.schema.hasTable(tableName).then(function(exists) {
  *         total: 100
  *     }
  * }
- *
- *
  */
-function fetchList(options, pagination) {
-  console.log(options, pagination);
-  return knex
+async function fetchList(options, pagination) {
+  const pageSize = pagination.pageSize || 10;
+  const current = pagination.current || 1;
+  const offset = (current - 1) * pageSize;
+
+  const total = await createBuilder(options)
+    .count("* as total")
+    .then(result => result[0].total);
+
+  const rows = await createBuilder(options)
     .select("*")
-    .from(tableName)
     .orderBy("id", "desc")
-    .then(function(rows) {
-      return {
-        status: "ok",
-        list: rows,
-        pagination: {
-          current: 1,
-          total: 101,
-          pageSize: 10
-        }
-      };
-    });
+    .limit(pageSize)
+    .offset(offset);
+
+  return {
+    status: "ok",
+    list: rows,
+    pagination: {
+      current,
+      pageSize,
+      total
+    }
+  };
 }
 
+async function print(record) {
+  await knex(tableName)
+    .where("id", record.id)
+    .update({ printed: "yes" });
+}
 function deleteOne(record) {
   return knex(tableName)
     .where("id", record.id)
     .del();
 }
 
-function store(record) {
+async function store(record) {
   record.serialNumber = generateSerial();
   var newRecord = record;
 
   // 返回的是一个promise
-  return knex(tableName)
-    .insert(record)
-    .then(id => {
-      newRecord.id = id[0];
-      return newRecord;
-    });
+  const id = await knex(tableName).insert(record);
+  newRecord.id = id[0];
+  return newRecord;
 }
 
+/**
+ * 开始注册事件
+ */
 const { ipcMain } = require("electron");
 
 ipcMain.handle("store", async (event, record) => {
   const newRecord = await store(record);
   return newRecord;
+});
+
+ipcMain.handle("print", async (event, record) => {
+  await print(record);
+  return record;
 });
 
 ipcMain.handle("fetchList", async (event, options, pagination) => {
