@@ -44,7 +44,7 @@ class TagSelect extends React.Component {
   };
 
   render() {
-    const { title, currentKey, divider } = this.props;
+    const { title, currentKey } = this.props;
     return (
       <div>
         <span style={{ display: "inline-block", width: 100, fontSize: 14 }}>
@@ -62,7 +62,6 @@ class TagSelect extends React.Component {
             </CheckableTag>
           );
         })}
-        {divider && <Divider dashed={true} style={{ margin: 12 }} />}
       </div>
     );
   }

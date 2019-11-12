@@ -2,7 +2,7 @@ import React from "react";
 import { Card, Icon, Descriptions, Popconfirm, Rate, Modal } from "antd";
 import RecordTitle from "../RecordTitle";
 import Print from "../../views/print";
-import EditForm from "../EditForm";
+import EditFormModal from "../EditFormModal";
 
 class Records extends React.Component {
   state = {
@@ -18,6 +18,15 @@ class Records extends React.Component {
   };
   handleEdit = record => {
     this.setState({ editVisible: true, currentRecord: record });
+  };
+  handleEditModalCancel = () => {
+    this.setState({ editVisible: false });
+  };
+  handleUpdate = record => {
+    this.setState({ editVisible: false });
+    if (this.props.handleUpdate) {
+      this.props.handleUpdate(record);
+    }
   };
   handlePrintCancel = () => {
     this.setState({ printVisible: false });
@@ -248,15 +257,13 @@ class Records extends React.Component {
             handleAfterPrint={this.handleAfterPrint}
           />
         </Modal>
-        <Modal
-          key="edit"
-          width={980}
+
+        <EditFormModal
           visible={this.state.editVisible}
-          onCancel={() => this.setState({ editVisible: false })}
+          record={this.state.currentRecord}
+          onCancel={this.handleEditModalCancel}
           onOk={this.handleUpdate}
-        >
-          <EditForm record={this.state.currentRecord} />
-        </Modal>
+        />
       </div>
     );
   }

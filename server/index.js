@@ -1,11 +1,7 @@
-function generateSerial() {
-  const date = new Date();
-  const dateStr =
-    "" + date.getFullYear() + (date.getMonth() + 1) + date.getDate();
-  return dateStr + "111";
-}
-
+const { ipcMain } = require("electron");
+const moment = require("moment");
 const tableName = "records";
+
 var knex = require("knex")({
   client: "sqlite3",
   connection: {
@@ -13,12 +9,14 @@ var knex = require("knex")({
   },
   useNullAsDefault: true
 });
+
 knex.schema.hasTable(tableName).then(function(exists) {
   if (!exists) {
     knex.schema
       .createTable(tableName, function(table) {
         table.increments("id");
         table.string("serialNumber");
+        table.integer("subSerial").defaultTo(1); // 每日报修的子序列号
         table.string("name");
         table.string("location");
         table.string("content");
@@ -42,6 +40,22 @@ knex.schema.hasTable(tableName).then(function(exists) {
       });
   }
 });
+
+function generateSerial(next) {
+  return moment().format("YYYYMMDD") + next.toString().padStart(3, "0");
+}
+
+async function getMaxSubSerial() {
+  const today = moment();
+  const tomorrow = moment().add(1, "day");
+  const result = await knex(tableName)
+    .whereBetween("created_at", [
+      today.format("YYYY-MM-DD"),
+      tomorrow.format("YYYY-MM-DD")
+    ])
+    .max("subSerial as max");
+  return result[0].max;
+}
 
 function createBuilder(options) {
   const builder = knex.from(tableName);
@@ -113,11 +127,12 @@ async function fetchList(options, pagination) {
   };
 }
 
-async function print(record) {
-  await knex(tableName)
+function print(record) {
+  return knex(tableName)
     .where("id", record.id)
     .update({ printed: "yes" });
 }
+
 function deleteOne(record) {
   return knex(tableName)
     .where("id", record.id)
@@ -125,7 +140,13 @@ function deleteOne(record) {
 }
 
 async function store(record) {
-  record.serialNumber = generateSerial();
+  const max = await getMaxSubSerial();
+  const next = max ? max + 1 : 1;
+  record.serialNumber = generateSerial(next);
+  record.subSerial = next;
+  record.created_at = record.updated_at = moment().format(
+    "YYYY-MM-DD HH:mm:ss"
+  );
   var newRecord = record;
 
   // 返回的是一个promise
@@ -134,14 +155,22 @@ async function store(record) {
   return newRecord;
 }
 
-/**
- * 开始注册事件
- */
-const { ipcMain } = require("electron");
+async function update(record) {
+  record.updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
+  // 返回的是一个promise
+  await knex(tableName)
+    .where("id", record.id)
+    .update(record);
+}
 
 ipcMain.handle("store", async (event, record) => {
   const newRecord = await store(record);
   return newRecord;
+});
+
+ipcMain.handle("update", async (event, record) => {
+  await update(record);
+  return record;
 });
 
 ipcMain.handle("print", async (event, record) => {

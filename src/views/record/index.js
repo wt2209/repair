@@ -11,6 +11,7 @@ import {
 } from "antd";
 import TagSelect from "../../components/TagSelect";
 import SearchBar from "../../components/SearchBar";
+import { formatRecordDate } from "../../utils";
 
 const { ipcRenderer } = window.electron;
 
@@ -83,7 +84,20 @@ class Record extends React.Component {
       });
   };
   handleUpdate = record => {
-    console.log("update", record);
+    ipcRenderer.invoke("update", formatRecordDate(record)).then(record => {
+      message.success("修改成功", 2);
+      // 更新原有数据
+      const records = this.state.records.map(item => {
+        if (item.id === record.id) {
+          return {
+            ...item,
+            ...record
+          };
+        }
+        return item;
+      });
+      this.setState({ records });
+    });
   };
   handleDelete = async record => {
     this.setState({ loading: true });
@@ -91,7 +105,14 @@ class Record extends React.Component {
       const { records } = this.state;
       const newRecords = records.filter(item => item.id !== record.id);
       records.splice(records.indexOf(record), 1);
-      this.setState({ records: newRecords, loading: false });
+      this.setState({
+        records: newRecords,
+        loading: false,
+        pagination: {
+          ...this.state.pagination,
+          total: this.state.pagination.total - 1
+        }
+      });
       message.success("删除成功", 2.5);
     });
   };
@@ -144,16 +165,17 @@ class Record extends React.Component {
           {Object.keys(ins).map(key => {
             const item = ins[key];
             return (
-              <TagSelect
-                divider={true}
-                key={key}
-                currentKey={key}
-                title={item.title}
-                options={item.labels}
-                onChange={(key, value) =>
-                  this.handleTagSelectChange(key, value)
-                }
-              />
+              <React.Fragment key={key}>
+                <TagSelect
+                  currentKey={key}
+                  title={item.title}
+                  options={item.labels}
+                  onChange={(key, value) =>
+                    this.handleTagSelectChange(key, value)
+                  }
+                />
+                <Divider dashed={true} style={{ margin: 12 }} />
+              </React.Fragment>
             );
           })}
           <SearchBar onSearch={values => this.handleSearch(values)} />
@@ -175,7 +197,7 @@ class Record extends React.Component {
         <Records
           records={this.state.records}
           handleDelete={this.handleDelete}
-          handleEdit={this.handleEdit}
+          handleUpdate={this.handleUpdate}
           handleAfterPrint={this.handleAfterPrint}
         />
         {pagination.current > 0 && (
