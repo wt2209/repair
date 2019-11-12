@@ -1,4 +1,6 @@
 import React from "react";
+import xlsx from "xlsx";
+import * as fs from "fs";
 import Records from "../../components/Records";
 import {
   Pagination,
@@ -119,24 +121,11 @@ class Record extends React.Component {
   handleAfterPrint = record => {
     ipcRenderer.invoke("print", record).then(record => {});
   };
+  handleExport = () => {
+    ipcRenderer.invoke("export", this.state.pagination).then(status => {});
+  };
   render() {
     const ins = {
-      // timely: {
-      //   title: "按时到达",
-      //   labels: [{ label: "是", value: "yes" }, { label: "否", value: "no" }]
-      // },
-      // clean: {
-      //   title: "打扫现场",
-      //   labels: [{ label: "是", value: "yes" }, { label: "否", value: "no" }]
-      // },
-      // attitude: {
-      //   title: "态度如何",
-      //   labels: [
-      //     { label: "好", value: "good" },
-      //     { label: "一般", value: "general" },
-      //     { label: "差", value: "bad" }
-      //   ]
-      // },
       satisfaction: {
         title: "满意度",
         labels: [
@@ -180,7 +169,7 @@ class Record extends React.Component {
           })}
           <SearchBar onSearch={values => this.handleSearch(values)} />
           <Divider dashed={true} style={{ margin: 12 }} />
-          <Button>导出以下内容</Button>
+          <Button onClick={this.handleExport}>导出以下内容</Button>
         </Card>
         <div
           style={{

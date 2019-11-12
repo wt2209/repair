@@ -75,7 +75,9 @@ class EditFormModal extends React.Component {
           </Descriptions.Item>
           <Descriptions.Item label="预约时间">
             {getFieldDecorator("appointmentTime", {
-              initialValue: moment(record.appointmentTime)
+              initialValue: record.appointmentTime
+                ? moment(record.appointmentTime)
+                : null
             })(
               <DatePicker
                 format="YYYY-MM-DD HH:mm"
@@ -86,7 +88,9 @@ class EditFormModal extends React.Component {
           </Descriptions.Item>
           <Descriptions.Item label="完成时间">
             {getFieldDecorator("completeTime", {
-              initialValue: moment(record.completeTime)
+              initialValue: record.completeTime
+                ? moment(record.completeTime)
+                : null
             })(
               <DatePicker
                 format="YYYY-MM-DD HH:mm"

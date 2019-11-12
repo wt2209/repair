@@ -127,6 +127,13 @@ async function fetchList(options, pagination) {
   };
 }
 
+async function fetchAll(options) {
+  const rows = await createBuilder(options)
+    .select("*")
+    .orderBy("id", "desc");
+  return rows;
+}
+
 function print(record) {
   return knex(tableName)
     .where("id", record.id)
@@ -181,6 +188,57 @@ ipcMain.handle("print", async (event, record) => {
 ipcMain.handle("fetchList", async (event, options, pagination) => {
   const result = await fetchList(options, pagination);
   return result;
+});
+
+ipcMain.handle("export", async (event, options) => {
+  const records = await fetchAll(options);
+  const yesOrNo = {
+    yes: "是",
+    no: "否"
+  };
+  const attitudes = {
+    good: "好",
+    general: "一般",
+    bad: "差"
+  };
+  const satisfactions = {
+    good: "满意",
+    very: "非常满意",
+    bad: "不满意"
+  };
+  const exports = records.map(record => {
+    return {
+      报修单位: record.company,
+      报修人: record.name,
+      报修地点: record.location,
+      联系电话: record.phone,
+      受理内容: record.content,
+      预约时间: record.appointmentTime,
+      完成时间: record.completeTime,
+      服务内容: record.serviceContent,
+      完工签字: record.repairer,
+      使用材料: record.material,
+      是否准时: record.timely ? yesOrNo[record.timely] : "",
+      态度: record.attitude ? attitudes[record.attitude] : "",
+      打扫现场: record.clean ? yesOrNo[record.timely] : "",
+      满意度: record.satisfaction ? satisfactions[record.satisfaction] : ""
+    };
+  });
+  const xlsx = require("xlsx");
+  const fs = require("fs");
+
+  const ws = xlsx.utils.json_to_sheet(exports, { header: ["报修单位"] });
+  const workBook = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(workBook, ws);
+  const result = xlsx.write(workBook, {
+    bookType: "xlsx", // 输出的文件类型
+    type: "buffer", // 输出的数据类型
+    compression: true // 开启zip压缩
+  });
+  fs.writeFile("./hello.xlsx", result, err => {
+    console.log(err);
+  });
+  return "ok";
 });
 
 ipcMain.handle("delete", async (event, record) => {

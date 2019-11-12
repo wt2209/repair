@@ -11,13 +11,15 @@
   "homepage": ".",
   "dependencies": {
     "antd": "^3.24.3",
+    "fs": "0.0.1-security",
     "knex": "^0.20.1",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.2.0",
     "react-to-print": "^2.5.0",
-    "sqlite3": "^4.1.0"
+    "sqlite3": "^4.1.0",
+    "xlsx": "^0.15.1"
   },
   "devDependencies": {
     "electron": "^7.0.1",
